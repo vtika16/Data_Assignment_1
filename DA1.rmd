@@ -1,3 +1,4 @@
+
 ---
 title: 'Data Analysis Assignment #1 (50 points total)'
 author: "Tika, Valon"
@@ -68,10 +69,6 @@ The following code chunk will (a) load the ggplot2 and gridExtra packages, assum
 ```{r analysis_setup1, eval = TRUE, echo = FALSE, message = FALSE, warning = FALSE}
 
 # a) Load the ggplot2 and gridExtra packages.
-install.packages("ggplot2")
-install.packages("gridExtra")
-install.packages("knitr")
-
 library(ggplot2)
 library(gridExtra)
 library(knitr)
@@ -79,7 +76,7 @@ library(knitr)
 # b) Use read.csv() to read the abalones.csv into R, assigning the data frame to "mydata."
 
 # mydata <- read.csv(file.path("c:/Rabalone_new/", "abalones.csv"), sep = ",")
-mydata <- read.csv("abalones.csv", sep = ",")
+mydata <- read.csv("C:/Users/vtfx3/Desktop/MSDS 401/abalones.csv", sep = ",")
 
 # c) Use the str() function to verify the structure of "mydata." You should have 1036 observations
 # of eight variables.
@@ -325,24 +322,50 @@ grid.arrange(a, b, c, d, ncol = 2)
 
 ```{r Part_5a, eval = TRUE, echo = FALSE}
 
-install.packages("reshape2")
-install.packages("dplyr")
 library(reshape2)
 library(dplyr)
 
-
-attach(mydata)
 
 new <- mydata %>%
 group_by(SEX, CLASS) %>%
 summarise(Volume = mean(VOLUME), Shuck = mean(SHUCK), Ratio = mean(RATIO))
 
-
-
-attach(new)
-
 md <- melt(new, id=c("SEX","CLASS"))
 
+
+mdvolume <- md %>%
+  filter(variable == "Volume") %>%
+  select("SEX","CLASS","value")
+
+
+mdshuck <- md %>%
+  filter(variable == "Shuck")%>%
+  select("SEX","CLASS","value")
+
+mdratio <- md %>%
+  filter(variable == "Ratio")%>%
+  select("SEX","CLASS","value")
+
+
+mdvolume <- dcast(mdvolume, SEX~CLASS, mean)
+mdshuck <- dcast(mdshuck, SEX~CLASS, mean)
+mdratio <- dcast(mdratio, SEX~CLASS, mean)
+
+
+sex <- c("M","F","I")
+
+mdvolume <- data.matrix(mdvolume)
+mdshuck <- data.matrix(mdshuck)
+mdratio <- data.matrix(mdratio)
+
+rownames(mdvolume) <- sex
+rownames(mdshuck) <- sex
+rownames(mdratio) <- sex
+
+
+print(mdvolume)
+print(mdshuck)
+print(mdratio)
 
 ```
 
@@ -367,10 +390,6 @@ ggplot(md) +
 5(c) (3 points) Present four different boxplot displays using *par(mfrow = c(2, 2)*. The first line would show VOLUME by RINGS for the infants and the adults (factor levels "M" and "F" combined), The second line would show WHOLE by RINGS for the infants and the adults (factor levels "M" and "F" combined). Since the data are sparse beyond 15 rings, limit the displays to less than 16 rings.  Use ylim = c(0,1100) for VOLUME and ylim = c(0, 400) for WHOLE.  If you wish to reorder the displays for presentation purposes or use ggplot2 go ahead.
 
 ```{r Part_5c, eval = TRUE, echo = FALSE}
-
-install.packages("dplyr")
-library(dplyr)
-
 combined <- filter(mydata, RINGS < 16)
 combined$age <- ifelse(combined$SEX == "I", "Infant", "Adult")
 combined$RINGS <- as.factor(combined$RINGS)
